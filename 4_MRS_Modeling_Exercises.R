@@ -31,7 +31,8 @@ flightsXdf <- "flights.xdf"
 
 # Import to XDF
 rxImport(inData = flightsCsv,
-         outFile = flightsXdf)
+         outFile = flightsXdf,
+         overwrite = TRUE)
 
 
 
@@ -54,9 +55,9 @@ rxFactors(inData = flightsXdf,
                                  levels = c("Sunday", "Monday", "Tuesday", 
                                             "Wednesday", "Thursday", "Friday",
                                             "Saturday")),
-                            origin_F = list(varName = "origin"), 
-                            dest_F = list(varName = "dest"),
-                            carrier_F = list(varName = "carrier")
+                origin_F = list(varName = "origin"), 
+                dest_F = list(varName = "dest"),
+                carrier_F = list(varName = "carrier")
           )
 )
 
@@ -121,7 +122,7 @@ rxGetInfo(flightsXdf, getVarInfo = TRUE, numRows = 5)
 # Summarize *departure delay* (dep_delay) for each of the three origin airports:
 # Remember: grouping variables must be factors.
 
-
+rxSummary(origin_F ~ dep_delay, data = flightsXdf)
 
 
 
@@ -138,7 +139,7 @@ rxQuantile(varName = "arr_delay", data = flightsXdf)
 # But you can use the probs argument to get other quantiles For example:
 # probs = c(0.10, 0.90) would return the 10th and 90th quantiles.
 
-
+rxQuantile(varName = "arr_delay", data = flightsXdf, probs = c(0.1, 0.9))
 #################################
 # Exercise 2
 #################################
@@ -147,6 +148,7 @@ rxQuantile(varName = "arr_delay", data = flightsXdf)
 # 2.5th and 97.5th quantiles:
 
 
+rxQuantile(varName = "arr_delay", data = flightsXdf, probs = c(0.025, 0.975))
 
 
 
@@ -188,13 +190,15 @@ rxCube( ~ dest_F : origin_F, data = flightsXdf)
 # The examples above use origin_F and dest_F.
 # Use rxGetInfo() to identify another factor on the dataset:
 
-
+rxGetInfo(flightsXdf, getVarInfo = TRUE)
 
 
 # And use it to create three-factor tables with both rxCrossTabs() and rxCube(),
 # and compare the results:
 
+rxCrossTabs( ~ dest_F : origin_F : dayOfWeek_F, data = flightsXdf)
 
+rxCube( ~ dest_F : origin_F : dayOfWeek_F, data = flightsXdf)
 
 
 
@@ -248,9 +252,14 @@ rxPredict(modelObject = mod1,
 
 # Use rxGetInfo() to review the available variables and build a more complex
 # model for predicting arrival delay, then use summary() to evaluate the results.
+rxGetInfo(flightsXdf, numRows = 5)
 
 
-
+mod2 <- rxLinMod(arr_delay ~ dep_time + origin_F + dep_delay + 
+                             arr_time + carrier_F + origin_F + 
+                             air_time + distance + hour + minute + 
+                             dayOfWeek_F, data = flightsXdf)
+summary(mod2)
 
 
 

@@ -30,7 +30,7 @@ list.files(rxGetOption("sampleDataDir"))
 
 # Fill in the blank with the filepath to the sample data directory below to create 
 # a filepath to the dataset "mortDefault2000.csv"
-csvFile <- file.path(________________, "mortDefaultSmall2000.csv")
+csvFile <- file.path(rxGetOption("sampleDataDir"), "mortDefaultSmall2000.csv")
 
 
 
@@ -63,8 +63,8 @@ file.exists(xdfFile)
 
 # To create the XDF file, use rxImport to read data from your CSV into a new
 # XDF file. Fill in the blanks here:
-rxImport(inData = ________,
-         outFile = _______)
+rxImport(inData = csvFile,
+         outFile = xdfFile)
 
 
 
@@ -111,7 +111,7 @@ xdfSubset <- "xdfSubset.xdf"
 
 rxImport(inData = csvFile, 
          outFile = xdfSubset,
-         ________ = ____________
+         varsToKeep = c("creditScore", "houseAge", "default")
 )
 
 
@@ -142,9 +142,9 @@ rxGetInfo(xdfFile, numRows = 10)
 csv2001 <- file.path(rxGetOption("sampleDataDir"), "mortDefaultSmall2001.csv")
 
 # Use rxImport to append csv2001 to the existing XDF file (xdfFile):
-rxImport(____________,
-         ____________,
-         ____________
+rxImport(inData = csv2001,
+         outFile = xdfFile,
+         append = TRUE
 )
 
 
@@ -187,11 +187,11 @@ lapply(csvList, FUN = file.exists)
 # new data to an XDF file. Here's the framework - fill in the blanks to make it
 # work:
 
-lapply(_______, FUN = function(oneCsv) {
+lapply(csvList, FUN = function(oneCsv) {
     
     rxImport(inData = oneCsv,
-             outFile = _________,
-             append = _________)
+             outFile = xdfAll,
+             append = file.exists(xdfAll))
 })
 
 
@@ -233,7 +233,7 @@ xdfDefaults <- "defaultsOnly.xdf"
 # Use rxImport again:
 rxImport(inData = csvFile,
          outFile = xdfDefaults,
-         __________ = (_____________)
+         rowSelection = (default == 1)
 )
 
 
@@ -291,7 +291,8 @@ rxGetInfo(airlineXdf, getVarInfo = TRUE, numRows = 10)
 # argument so that arrDelay is an integer and DayOfWeek is a factor
 rxImport(inData = airlineCsv,
          outFile = airlineXdf,
-         colClasses = _________________,
+         colClasses = c(ArrDelay = "integer",
+                        DayofWeek = "factor"),
          missingValueString = "M",
          overwrite = TRUE
 )
@@ -331,10 +332,11 @@ rxGetVarInfo(airlineXdf)
 
 rxImport(inData = airlineCsv,
          outFile = airlineXdf,
-         colClasses = c(__________),
+         colClasses = c(ArrDelay = "integer",
+                        DayofWeek = "factor"),
          colInfo = list(
-             CRSDepTime = list(newName = __________),
-             DayOfWeek = list(type = __________,
+             CRSDepTime = list(newName = "DepartureTime"),
+             DayOfWeek = list(type = "factor",
                               levels = c("Sunday", "Monday", "Tuesday",
                                          "Wednesday", "Thursday",
                                          "Friday", "Saturday"
@@ -374,7 +376,7 @@ claimsString <- paste0("Driver={SQLite3 ODBC Driver};Database=", claimsDB)
 # - sqlQuery, the SQL query we want this data source to use, and
 # - connectionString - which takes the database connection string we just created:
 claimsSource <- RxOdbcData(sqlQuery = "SELECT * FROM claims",
-                           _________ = _________)
+                           connectionString = claimsString)
 
 
 
@@ -383,8 +385,8 @@ claimsXdf <- "claims.xdf"
 
 
 # And import the data
-rxImport(inData = __________,
-         outFile = __________)
+rxImport(inData = claimsSource,
+         outFile = claimsXdf)
 
 
 

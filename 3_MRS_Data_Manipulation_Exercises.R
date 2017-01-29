@@ -43,7 +43,8 @@ flightsXdf <- "flights.xdf"
 
 
 
-
+rxImport(inData = flightsCsv,
+         outFile = flightsXdf)
 
 
 
@@ -80,7 +81,10 @@ flightsSorted <- "flights_sorted.xdf"
 # Write your rxSort here:
 
 
-
+rxSort(inData = flightsXdf,
+         outFile = flightsSorted,
+         sortByVars = "arr_delay",
+         overwrite = TRUE)
 
 
 
@@ -101,6 +105,11 @@ rxDataStep(flightsSorted, numRows = 10)
 # Try that here:
 
 
+rxSort(inData = flightsXdf,
+       outFile = flightsSorted,
+       sortByVars = "arr_delay",
+       decreasing = TRUE,
+       overwrite = TRUE)
 
 
 
@@ -127,7 +136,10 @@ rxDataStep(flightsSorted, numRows = 10)
 # understand how to apply the function)
 uniqueCarriers <- "uniqueCarriers.xdf"
 
-
+rxSort(inData = flightsXdf,
+       outFile = uniqueCarriers,
+       sortByVars = "carrier",
+       removeDupKeys = TRUE)
 
 
 
@@ -169,6 +181,8 @@ rxDataStep(uniqueCarriers)
 
 # Here's the airlines XDF:
 airlinesXdf <- "airlines.xdf"
+rxImport(inData = "airlines.csv",
+         outFile = airlinesXdf)
 
 # And a file for the results:
 carrier_decoded <- "carrier_decoded.xdf"
@@ -176,7 +190,17 @@ carrier_decoded <- "carrier_decoded.xdf"
 
 # Write your rxMerge here:
 
-
+rxMerge(inData1 = uniqueCarriers,
+        inData2 = airlinesXdf,
+        outFile = carrier_decoded,
+        overwrite = TRUE,
+        
+        # Type of join
+        type = "left",
+        
+        # Name the key variable(s)
+        matchVars = "carrier"
+)
 
 
 
@@ -258,7 +282,13 @@ rxDataStep(flightsXdf, numRows = 5)
 # Take note: air_time is in minutes!
 
 
-
+rxDataStep(inData = flightsXdf,
+           outFile = flightsXdf,
+           overwrite = TRUE,
+           transforms = list(
+                   airspeed = distance*60/air_time
+                   )
+           )
 
 
 
@@ -453,14 +483,30 @@ rxGetVarInfo(flightsXdf)
 # Use the newLevels argument to specify the order of the days in an order you
 # prefer (Sunday first, Monday first, etc.)
 
+rxFactors(inData = flightsXdf,
+          outFile = flightsXdf,
+          overwrite = TRUE,
+          
+          factorInfo = list(
+                  fact_dayOfWeek = list(varName = "dayOfWeek",
+                                       levels = c("Sunday", "Monday", "Tuesday",
+                                                  "Wednesday", "Thursday", "Friday",
+                                                  "Saturday")
+                                   )
+                )
+          )
 
 
 
 
 
 
-
-
+rxImport(inData = flightsXdf,
+           outFile = flightsXdf,
+           overwrite = TRUE,
+           varsToDrop = c("ayOfWeek", "new_dayofWeek", "fact_dayOfWeek")
+           #overwrite = TRUE
+)
 
 
 
